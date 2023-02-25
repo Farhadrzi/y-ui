@@ -1,19 +1,16 @@
 package v2ui
 
 import (
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var v2db *gorm.DB
 
 func initDB(dbPath string) error {
-	c := &gorm.Config{
-		Logger: logger.Discard,
-	}
 	var err error
-	v2db, err = gorm.Open(sqlite.Open(dbPath), c)
+	dsn := "postgresql://masteradminking:wxpMSyWNnpTCKymDruablA@black-sponge-7079.8nj.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full"
+	v2db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return err
 	}

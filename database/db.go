@@ -1,15 +1,16 @@
 package database
 
 import (
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"io/fs"
+	"log"
 	"os"
 	"path"
-	"x-ui/config"
-	"x-ui/xray"
+	"time"
 	"x-ui/database/model"
+	"x-ui/xray"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var db *gorm.DB
@@ -53,27 +54,21 @@ func initMirrors() error {
 }
 
 func InitDB(dbPath string) error {
+
 	dir := path.Dir(dbPath)
 	err := os.MkdirAll(dir, fs.ModeDir)
 	if err != nil {
 		return err
 	}
 
-	var gormLogger logger.Interface
-
-	if config.IsDebug() {
-		gormLogger = logger.Default
-	} else {
-		gormLogger = logger.Discard
-	}
-
-	c := &gorm.Config{
-		Logger: gormLogger,
-	}
-	db, err = gorm.Open(sqlite.Open(dbPath), c)
+	dsn := "postgresql://masteradminking:wxpMSyWNnpTCKymDruablA@black-sponge-7079.8nj.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full"
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return err
+		log.Fatal("failed to connect database", err)
 	}
+
+	var now time.Time
+	db.Raw("SELECT NOW()").Scan(&now)
 
 	err = initUser()
 	if err != nil {
